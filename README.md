@@ -45,7 +45,7 @@ The AI is only ever given numbers that were already calculated by the app from t
 - **Frontend:** Vanilla HTML, CSS, JavaScript (no framework, no build step — single static file)
 - **Backend / Database:** [Supabase](https://supabase.com) — Postgres database, Auth (including anonymous/guest sign-in), Row Level Security
 - **Serverless functions:** Supabase Edge Functions (Deno)
-- **AI:** [Google Gemini API](https://aistudio.google.com) (`gemini-flash-latest`) — free tier, called only from Edge Functions, never exposed to the frontend
+- **AI:** [Google Gemini API](https://aistudio.google.com) (`gemini-flash-lite-latest`) — free tier, called only from Edge Functions, never exposed to the frontend
 - **Voice input:** Browser-native Web Speech API
 - **Hosting:** [Netlify](https://netlify.com)
 
