@@ -5,97 +5,121 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SpendWise AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --bg:#f7f7f5; --card:#ffffff; --border:#e6e4df; --foreground:#1b1b18; --muted:#8a8780;
-    --primary:#5b4dff; --primary-2:#8b6bff; --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-2));
-    --danger:#d9483f; --success:#1f9d63;
-    --shadow-card: 0 1px 2px rgba(20,20,15,0.04), 0 4px 14px rgba(20,20,15,0.04);
-    --radius:16px;
+    --bg:#faf9f6; --card:#ffffff; --border:#e9e7e0; --foreground:#1c1b18; --muted:#8c8a80;
+    --primary:#453d8f; --primary-2:#6259ab;
+    --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-2));
+    --danger:#c0453d; --success:#1f7a55;
+    --shadow-card: 0 1px 2px rgba(20,20,15,0.03), 0 6px 20px rgba(20,20,15,0.03);
+    --radius:14px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ font-family:'Inter', sans-serif; background:var(--bg); color:var(--foreground); }
-  .font-display{ font-family:'Space Grotesk'; }
+  .font-display{ font-family:'Fraunces', serif; }
   .hidden{ display:none !important; }
 
-  /* Auth screen */
+  /* ---------------- Auth screen ---------------- */
   .auth-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
-  .auth-card{ width:100%; max-width:380px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:32px; box-shadow:var(--shadow-card); }
-  .auth-title{ font-family:'Space Grotesk'; font-size:22px; font-weight:700; margin-bottom:4px; }
-  .auth-sub{ color:var(--muted); font-size:13px; margin-bottom:22px; }
+  .auth-card{ width:100%; max-width:380px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:36px 32px; box-shadow:var(--shadow-card); }
+  .auth-title{ font-family:'Fraunces', serif; font-size:23px; font-weight:600; margin-bottom:5px; }
+  .auth-sub{ color:var(--muted); font-size:13px; margin-bottom:24px; }
   .field{ margin-bottom:14px; }
-  .field label{ display:block; font-size:12px; font-weight:600; margin-bottom:6px; }
+  .field label{ display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--foreground); }
   .field input, .field select{
-    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; background:var(--card);
   }
   .field input:focus, .field select:focus{ outline:2px solid var(--primary); outline-offset:1px; }
   .btn{
     width:100%; padding:11px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer;
     background:var(--gradient-primary); color:white; margin-top:6px;
+    transition: transform .12s ease, opacity .15s ease, box-shadow .15s ease;
   }
+  .btn:not(:disabled):hover{ transform: translateY(-1px); box-shadow:0 6px 16px rgba(69,61,143,0.18); }
+  .btn:not(:disabled):active{ transform: translateY(0); }
   .btn:disabled{ opacity:0.6; cursor:not-allowed; }
   .btn-secondary{ background:none; border:1px solid var(--border); color:var(--foreground); }
-  .toggle-link{ text-align:center; font-size:13px; margin-top:16px; color:var(--muted); }
+  .btn-secondary:not(:disabled):hover{ background:#f4f3ee; box-shadow:none; transform:none; }
+  .toggle-link{ text-align:center; font-size:13px; margin-top:18px; color:var(--muted); }
   .toggle-link a{ color:var(--primary); font-weight:600; text-decoration:none; cursor:pointer; }
-  .error-msg{ background:#fdecea; color:var(--danger); font-size:13px; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
-  .success-msg{ background:#e9f9f0; color:var(--success); font-size:13px; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
+  .error-msg{ background:#fbecea; color:var(--danger); font-size:13px; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
+  .success-msg{ background:#e9f5ee; color:var(--success); font-size:13px; padding:10px 12px; border-radius:10px; margin-bottom:14px; }
 
-  /* App shell */
-  header.topbar{
-    display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--card);
-    border-bottom:1px solid var(--border);
+  /* ---------------- App shell / layout ---------------- */
+  .app-shell{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width:230px; flex-shrink:0; background:var(--card); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:24px 16px; position:sticky; top:0; height:100vh;
   }
-  .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-icon{ width:32px; height:32px; border-radius:9px; background:var(--gradient-primary); }
-  .brand-name{ font-family:'Space Grotesk'; font-weight:700; font-size:16px; }
-  main{ max-width:900px; margin:0 auto; padding:28px 20px 80px; }
+  .brand{ display:flex; align-items:center; gap:10px; padding:0 8px; margin-bottom:30px; }
+  .brand-icon{ width:30px; height:30px; border-radius:8px; background:var(--gradient-primary); flex-shrink:0; }
+  .brand-name{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; letter-spacing:0.01em; }
+  .brand-sub{ font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
 
+  .nav-list{ display:flex; flex-direction:column; gap:2px; flex:1; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:9px; cursor:pointer;
+    color:var(--muted); font-size:13.5px; font-weight:500; transition:background .15s, color .15s; border:none; background:none; width:100%; text-align:left; font-family:inherit;
+  }
+  .nav-item svg{ width:18px; height:18px; flex-shrink:0; opacity:0.85; }
+  .nav-item:hover{ background:#f5f4ef; color:var(--foreground); }
+  .nav-item.active{ background:#eeecfb; color:var(--primary); font-weight:600; }
+  .nav-item.active svg{ opacity:1; }
+
+  .sidebar-footer{ font-size:11px; color:var(--muted); padding:0 8px; }
+
+  /* Mobile top bar + bottom nav (hidden on desktop) */
+  .mobile-topbar{ display:none; }
+  .mobile-nav{ display:none; }
+
+  .content-area{ flex:1; min-width:0; }
+  main{ max-width:760px; margin:0 auto; padding:36px 28px 60px; }
+
+  .page-header{ margin-bottom:26px; }
+  .page-title{ font-family:'Fraunces', serif; font-size:26px; font-weight:600; }
+  .page-subtitle{ font-size:13px; color:var(--muted); margin-top:4px; }
+
+  /* ---------------- Shared components ---------------- */
   .stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:22px; }
   .stat-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow-card); }
   .stat-label{ font-size:11px; font-weight:600; text-transform:uppercase; color:var(--muted); letter-spacing:.05em; }
-  .stat-value{ font-family:'Space Grotesk'; font-size:26px; font-weight:700; margin-top:6px; }
+  .stat-value{ font-family:'Space Grotesk'; font-size:25px; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
 
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-card); margin-bottom:20px; }
-  .card-title{ font-size:15px; font-weight:600; margin-bottom:14px; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow-card); margin-bottom:18px; }
+  .card-title{ font-size:15px; font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+
+  .card-ai{
+    background:var(--card); border-radius:var(--radius); padding:22px; margin-bottom:18px;
+    box-shadow:var(--shadow-card); border:1px solid var(--border); border-left:3px solid var(--primary);
+  }
+  .ai-badge{
+    display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; color:var(--primary);
+    background:#eeecfb; padding:2px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:0.04em;
+  }
 
   .expense-form{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .expense-form .full{ grid-column:1/-1; }
 
-  .tx-item{ display:flex; align-items:center; gap:12px; padding:10px 0; }
+  .tx-item{ display:flex; align-items:center; gap:12px; padding:11px 0; }
   .tx-item + .tx-item{ border-top:1px solid #f2f1ec; }
   .tx-mid{ flex:1; min-width:0; }
   .tx-title{ font-size:14px; font-weight:500; }
   .tx-meta{ font-size:11px; color:var(--muted); margin-top:2px; }
-  .tx-amount{ font-size:14px; font-weight:600; }
+  .tx-amount{ font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+  .tx-edit{ background:none; border:none; color:var(--primary); cursor:pointer; font-size:13px; padding:4px 8px; }
+  .tx-edit:hover{ text-decoration:underline; }
   .tx-delete{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px 8px; }
   .tx-delete:hover{ color:var(--danger); }
 
-  .empty-state{ text-align:center; padding:30px 10px; color:var(--muted); font-size:13px; }
+  .empty-state{ text-align:center; padding:34px 10px; color:var(--muted); font-size:13px; }
   .empty-state .empty-icon{ font-size:26px; margin-bottom:8px; opacity:0.5; }
-  .logout-btn{ background:none; border:1px solid var(--border); border-radius:9px; padding:7px 14px; font-size:13px; cursor:pointer; transition:background .15s; }
+
+  .logout-btn{ background:none; border:1px solid var(--border); border-radius:9px; padding:9px 14px; font-size:13px; cursor:pointer; transition:background .15s; width:100%; }
   .logout-btn:hover{ background:#f4f3ee; }
 
-  /* ---- Polish pass ---- */
-
-  /* Distinguish the two AI-powered cards from plain form cards */
-  .card-ai{
-    background:var(--card); border-radius:var(--radius); padding:20px; margin-bottom:20px;
-    position:relative; box-shadow:var(--shadow-card);
-    border:1px solid transparent;
-    background-image: linear-gradient(var(--card), var(--card)), linear-gradient(120deg, var(--primary), #ff8fd6 60%, var(--primary-2));
-    background-origin: border-box; background-clip: padding-box, border-box;
-  }
-  .card-ai .card-title{ display:flex; align-items:center; gap:6px; }
-
-  /* Buttons: hover + smoother disabled state */
-  .btn{ transition: transform .12s ease, opacity .15s ease, box-shadow .15s ease; }
-  .btn:not(:disabled):hover{ transform: translateY(-1px); box-shadow:0 6px 16px rgba(91,77,255,0.18); }
-  .btn:not(:disabled):active{ transform: translateY(0); }
-  .btn-secondary:not(:disabled):hover{ background:#f4f3ee; box-shadow:none; transform:none; }
-
-  /* Small inline spinner shown inside buttons during AI calls */
   .btn-spinner{
     display:inline-block; width:13px; height:13px; border-radius:50%;
     border:2px solid rgba(255,255,255,0.4); border-top-color:#fff;
@@ -103,33 +127,44 @@
   }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  /* Fade/slide-in for AI result panels instead of an abrupt appearance */
   .fade-in{ animation: fadeInUp .25s ease both; }
   @keyframes fadeInUp{
     from{ opacity:0; transform:translateY(6px); }
     to{ opacity:1; transform:translateY(0); }
   }
 
-  /* Edit button hover */
-  .tx-edit:hover{ text-decoration:underline; }
+  /* ---------------- Mobile ---------------- */
+  @media (max-width: 900px){
+    .sidebar{ display:none; }
+    .mobile-topbar{
+      display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10;
+      background:rgba(250,249,246,0.92); backdrop-filter:blur(8px); padding:14px 18px; border-bottom:1px solid var(--border);
+    }
+    main{ padding:22px 18px 90px; }
+    .mobile-nav{
+      display:flex; position:fixed; bottom:0; left:0; right:0; z-index:20;
+      background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); border-top:1px solid var(--border);
+      justify-content:space-around; padding:6px 2px;
+    }
+    .mobile-nav .nav-item{
+      flex-direction:column; gap:3px; font-size:10px; padding:8px 4px; border-radius:9px; flex:1; align-items:center;
+    }
+    .mobile-nav .nav-item.active{ background:none; }
+    .mobile-nav svg{ width:20px; height:20px; }
 
-  /* Consistent numeric weight everywhere amounts appear */
-  .tx-amount, .stat-value, .cat-amount{ font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+    .ai-input-row{ flex-wrap:wrap; }
+    .ai-input-row input{ flex-basis:100% !important; }
+    .ai-input-row button{ flex:1 !important; }
+    #micBtn{ flex:0 0 44px !important; }
 
-  /* Card title icon spacing consistency */
-  .card-title{ display:flex; align-items:center; gap:6px; }
-
-  @media (max-width: 640px){
-    /* Filter row stacks on mobile instead of squeezing into 4 columns */
     #filterCategory, #filterFrom, #filterTo{ font-size:13px; }
     .history-filter-grid{ grid-template-columns:1fr !important; }
     .history-filter-grid > div:last-child{ justify-content:stretch !important; }
     .history-filter-grid button{ flex:1; }
 
-    /* AI Coach / What-If 3-column stat rows collapse to a single column */
     .ai-stat-grid{ grid-template-columns:1fr !important; gap:14px !important; }
-
     .expense-form{ grid-template-columns:1fr !important; }
+    .stat-grid{ grid-template-columns:1fr 1fr !important; }
   }
 </style>
 </head>
@@ -138,9 +173,12 @@
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authScreen" class="auth-wrap">
   <div class="auth-card">
-    <div class="brand" style="margin-bottom:20px;">
+    <div class="brand" style="margin-bottom:24px;">
       <div class="brand-icon"></div>
-      <div class="brand-name">SpendWise AI</div>
+      <div>
+        <div class="brand-name">SpendWise</div>
+        <div class="brand-sub">AI</div>
+      </div>
     </div>
     <div id="authTitle" class="auth-title">Welcome back</div>
     <div id="authSub" class="auth-sub">Log in to track your spending.</div>
@@ -174,184 +212,324 @@
 
 <!-- ============ MAIN APP ============ -->
 <div id="appScreen" class="hidden">
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-icon"></div>
-      <div class="brand-name">SpendWise AI</div>
-    </div>
-    <button class="logout-btn" id="logoutBtn">Log out</button>
-  </header>
+  <div class="app-shell">
 
-  <main>
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-label">Today</div>
-        <div class="stat-value" id="statToday">₹0</div>
+    <!-- Desktop sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon"></div>
+        <div>
+          <div class="brand-name">SpendWise</div>
+          <div class="brand-sub">AI</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">This week</div>
-        <div class="stat-value" id="statWeek">₹0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">This month</div>
-        <div class="stat-value" id="statMonth">₹0</div>
-      </div>
-    </div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-page="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-page="add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+          Add Expense
+        </button>
+        <button class="nav-item" data-page="history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+          History
+        </button>
+        <button class="nav-item" data-page="coach">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path></svg>
+          AI Coach
+        </button>
+        <button class="nav-item" data-page="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          Settings
+        </button>
+      </nav>
+      <div class="sidebar-footer">SpendWise AI · Private ledger</div>
+    </aside>
 
-    <div class="card">
-      <div class="card-title">Add with AI ✨</div>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
-        Try: "I spent ₹450 on dinner yesterday" or "300 rupees on petrol today"
-      </p>
-      <div id="aiError" class="error-msg hidden"></div>
-      <div style="display:flex; gap:8px;">
-        <input id="aiTextInput" type="text" placeholder="Type your expense..." style="flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
-        <button id="micBtn" type="button" title="Speak your expense" style="width:44px; flex-shrink:0; border:1px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer; font-size:18px;">🎤</button>
-        <button id="aiParseBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Parse with AI</button>
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar">
+      <div class="brand" style="margin:0;">
+        <div class="brand-icon" style="width:26px;height:26px;"></div>
+        <div class="brand-name" style="font-size:14px;">SpendWise AI</div>
       </div>
-      <div id="voiceStatus" style="font-size:12px; color:var(--muted); margin-top:8px; display:none;"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Add an expense</div>
-      <p id="confirmNotice" class="hidden" style="font-size:12px; background:#eef2ff; color:var(--primary); padding:8px 12px; border-radius:10px; margin-bottom:12px;">
-        ✨ AI filled this in from your text — review and edit before saving.
-      </p>
-      <div id="formError" class="error-msg hidden"></div>
-      <div class="expense-form">
-        <div class="field">
-          <label>Amount (₹)</label>
-          <input id="amountInput" type="number" min="0" step="0.01" placeholder="450" />
-        </div>
-        <div class="field">
-          <label>Category</label>
-          <select id="categoryInput">
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Shopping</option>
-            <option>Education</option>
-            <option>Bills</option>
-            <option>Entertainment</option>
-            <option>Health</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field full">
-          <label>Description</label>
-          <input id="descriptionInput" type="text" placeholder="Dinner with friends" />
-        </div>
-        <div class="field">
-          <label>Date</label>
-          <input id="dateInput" type="date" />
-        </div>
-        <div class="field">
-          <label>Payment method</label>
-          <select id="paymentInput">
-            <option value="upi">UPI</option>
-            <option value="card">Card</option>
-            <option value="cash">Cash</option>
-          </select>
-        </div>
-        <button id="addExpenseBtn" class="btn full">Save expense</button>
-        <button id="cancelEditBtn" class="btn btn-secondary full hidden" style="margin-top:0;">Cancel edit</button>
-      </div>
+      <div id="mobilePageLabel" style="font-size:12px; color:var(--muted); font-weight:500;">Dashboard</div>
     </div>
 
-    <div class="card-ai">
-      <div class="card-title">✨ AI Financial Coach 🧭</div>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
-        Try: "Where am I spending the most?" or "How can I reduce my expenses?"
-      </p>
-      <div id="coachError" class="error-msg hidden"></div>
-      <div style="display:flex; gap:8px;">
-        <input id="coachInput" type="text" placeholder="Ask about your spending..." style="flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
-        <button id="coachBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Ask</button>
-      </div>
-      <div id="coachResult" class="hidden fade-in" style="margin-top:16px;">
-        <div style="background:#f6f5ff; border:1px solid #e0ddff; border-radius:14px; padding:16px; margin-bottom:12px;">
-          <div id="coachAnswer" style="font-size:14px; line-height:1.6;"></div>
-        </div>
-        <div id="coachRecsWrap">
-          <div style="font-size:11px; text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:8px;">Recommendations</div>
-          <ul id="coachRecs" style="font-size:13px; padding-left:18px; line-height:1.7;"></ul>
-        </div>
-        <details style="margin-top:12px;">
-          <summary style="font-size:11px; color:var(--muted); cursor:pointer;">View supporting stats used</summary>
-          <pre id="coachStatsDump" style="font-size:11px; background:#f7f7f5; padding:10px; border-radius:8px; margin-top:6px; overflow-x:auto;"></pre>
-        </details>
-      </div>
-    </div>
+    <div class="content-area">
+      <main>
 
-    <div class="card-ai">
-      <div class="card-title">✨ What-If Savings Simulator 🔮</div>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
-        Try: "What if I reduce my food expenses by 20%?" or "What if I cut shopping by ₹1000?"
-      </p>
-      <div id="whatifError" class="error-msg hidden"></div>
-      <div style="display:flex; gap:8px;">
-        <input id="whatifInput" type="text" placeholder="Ask a what-if question..." style="flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
-        <button id="whatifBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Calculate</button>
-      </div>
-      <div id="whatifResult" class="hidden fade-in" style="margin-top:16px; background:#f6f5ff; border:1px solid #e0ddff; border-radius:14px; padding:16px;">
-        <div style="font-size:13px; color:var(--muted); margin-bottom:10px;" id="whatifSummaryLine"></div>
-        <div class="ai-stat-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
-          <div>
-            <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Current spend</div>
-            <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700;" id="whatifCurrent">₹0</div>
+        <!-- ============ PAGE: DASHBOARD ============ -->
+        <div class="page" id="page-dashboard">
+          <div class="page-header">
+            <div class="page-title">Good day !</div>
+            <div class="page-subtitle">Here's a snapshot of your spending.</div>
           </div>
-          <div>
-            <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Monthly savings</div>
-            <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:var(--success);" id="whatifMonthly">₹0</div>
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-label">Today</div>
+              <div class="stat-value" id="statToday">₹0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">This week</div>
+              <div class="stat-value" id="statWeek">₹0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">This month</div>
+              <div class="stat-value" id="statMonth">₹0</div>
+            </div>
           </div>
-          <div>
-            <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Yearly savings</div>
-            <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:var(--success);" id="whatifYearly">₹0</div>
+
+          <div class="card">
+            <div class="card-title">Recent expenses</div>
+            <div id="txListWrap"><div class="empty-state"><div class="empty-icon">🧾</div>No expenses yet. Add your first one in "Add Expense".</div></div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Recent expenses</div>
-      <div id="txListWrap"><div class="empty-state"><div class="empty-icon">🧾</div>No expenses yet. Add your first one above ↑</div></div>
-    </div>
+        <!-- ============ PAGE: ADD EXPENSE ============ -->
+        <div class="page hidden" id="page-add">
+          <div class="page-header">
+            <div class="page-title">Add expense</div>
+            <div class="page-subtitle">Type, speak, or enter it manually.</div>
+          </div>
 
-    <div class="card">
-      <div class="card-title">Expense History</div>
-      <div class="history-filter-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; margin-bottom:16px;">
-        <div>
-          <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">Category</label>
-          <select id="filterCategory" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;">
-            <option value="">All categories</option>
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Shopping</option>
-            <option>Education</option>
-            <option>Bills</option>
-            <option>Entertainment</option>
-            <option>Health</option>
-            <option>Other</option>
-          </select>
+          <div class="card">
+            <div class="card-title"><span class="ai-badge">AI</span> Add with AI</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Try: "I spent ₹450 on dinner yesterday" or "300 rupees on petrol today"
+            </p>
+            <div id="aiError" class="error-msg hidden"></div>
+            <div class="ai-input-row" style="display:flex; gap:8px;">
+              <input id="aiTextInput" type="text" placeholder="Type your expense..." style="flex:1; min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
+              <button id="micBtn" type="button" title="Speak your expense" style="width:44px; flex-shrink:0; border:1px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer; font-size:18px;">🎤</button>
+              <button id="aiParseBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Parse with AI</button>
+            </div>
+            <div id="voiceStatus" style="font-size:12px; color:var(--muted); margin-top:8px; display:none;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Expense details</div>
+            <p id="confirmNotice" class="hidden" style="font-size:12px; background:#eeecfb; color:var(--primary); padding:8px 12px; border-radius:10px; margin-bottom:12px;">
+              ✨ AI filled this in from your text — review and edit before saving.
+            </p>
+            <div id="formError" class="error-msg hidden"></div>
+            <div class="expense-form">
+              <div class="field">
+                <label>Amount (₹)</label>
+                <input id="amountInput" type="number" min="0" step="0.01" placeholder="450" />
+              </div>
+              <div class="field">
+                <label>Category</label>
+                <select id="categoryInput">
+                  <option>Food</option>
+                  <option>Transport</option>
+                  <option>Shopping</option>
+                  <option>Education</option>
+                  <option>Bills</option>
+                  <option>Entertainment</option>
+                  <option>Health</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Description</label>
+                <input id="descriptionInput" type="text" placeholder="Dinner with friends" />
+              </div>
+              <div class="field">
+                <label>Date</label>
+                <input id="dateInput" type="date" />
+              </div>
+              <div class="field">
+                <label>Payment method</label>
+                <select id="paymentInput">
+                  <option value="upi">UPI</option>
+                  <option value="card">Card</option>
+                  <option value="cash">Cash</option>
+                </select>
+              </div>
+              <button id="addExpenseBtn" class="btn full">Save expense</button>
+              <button id="cancelEditBtn" class="btn btn-secondary full hidden" style="margin-top:0;">Cancel edit</button>
+            </div>
+          </div>
         </div>
-        <div>
-          <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">From date</label>
-          <input id="filterFrom" type="date" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;" />
+
+        <!-- ============ PAGE: HISTORY ============ -->
+        <div class="page hidden" id="page-history">
+          <div class="page-header">
+            <div class="page-title">Expense history</div>
+            <div class="page-subtitle">Filter by category or date range.</div>
+          </div>
+
+          <div class="card">
+            <div class="history-filter-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; margin-bottom:16px;">
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">Category</label>
+                <select id="filterCategory" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;">
+                  <option value="">All categories</option>
+                  <option>Food</option>
+                  <option>Transport</option>
+                  <option>Shopping</option>
+                  <option>Education</option>
+                  <option>Bills</option>
+                  <option>Entertainment</option>
+                  <option>Health</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">From date</label>
+                <input id="filterFrom" type="date" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">To date</label>
+                <input id="filterTo" type="date" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;" />
+              </div>
+              <div style="display:flex; align-items:flex-end; gap:8px;">
+                <button id="applyFiltersBtn" class="btn" style="width:auto; padding:9px 16px; margin-top:0;">Filter</button>
+                <button id="clearFiltersBtn" class="btn btn-secondary" style="width:auto; padding:9px 16px; margin-top:0;">Clear</button>
+              </div>
+            </div>
+            <div id="historyListWrap"><div class="empty-state">Loading history...</div></div>
+          </div>
         </div>
-        <div>
-          <label style="display:block; font-size:11px; font-weight:600; margin-bottom:5px;">To date</label>
-          <input id="filterTo" type="date" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:9px; font-size:13px;" />
+
+        <!-- ============ PAGE: AI COACH ============ -->
+        <div class="page hidden" id="page-coach">
+          <div class="page-header">
+            <div class="page-title">AI financial coach</div>
+            <div class="page-subtitle">Grounded in your real spending — never invented numbers.</div>
+          </div>
+
+          <div class="card-ai">
+            <div class="card-title"><span class="ai-badge">AI</span> Ask the coach</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Try: "Where am I spending the most?" or "How can I reduce my expenses?"
+            </p>
+            <div id="coachError" class="error-msg hidden"></div>
+            <div class="ai-input-row" style="display:flex; gap:8px;">
+              <input id="coachInput" type="text" placeholder="Ask about your spending..." style="flex:1; min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
+              <button id="coachBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Ask</button>
+            </div>
+            <div id="coachResult" class="hidden fade-in" style="margin-top:16px;">
+              <div style="background:#f6f5fb; border:1px solid #e2e0f4; border-radius:14px; padding:16px; margin-bottom:12px;">
+                <div id="coachAnswer" style="font-size:14px; line-height:1.6;"></div>
+              </div>
+              <div id="coachRecsWrap">
+                <div style="font-size:11px; text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:8px;">Recommendations</div>
+                <ul id="coachRecs" style="font-size:13px; padding-left:18px; line-height:1.7;"></ul>
+              </div>
+              <details style="margin-top:12px;">
+                <summary style="font-size:11px; color:var(--muted); cursor:pointer;">View supporting stats used</summary>
+                <pre id="coachStatsDump" style="font-size:11px; background:#f7f7f5; padding:10px; border-radius:8px; margin-top:6px; overflow-x:auto;"></pre>
+              </details>
+            </div>
+          </div>
+
+          <div class="card-ai">
+            <div class="card-title"><span class="ai-badge">AI</span> What-if simulator</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Try: "What if I reduce my food expenses by 20%?" or "What if I cut shopping by ₹1000?"
+            </p>
+            <div id="whatifError" class="error-msg hidden"></div>
+            <div class="ai-input-row" style="display:flex; gap:8px;">
+              <input id="whatifInput" type="text" placeholder="Ask a what-if question..." style="flex:1; min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit;" />
+              <button id="whatifBtn" class="btn" style="width:auto; white-space:nowrap; padding:10px 18px;">Calculate</button>
+            </div>
+            <div id="whatifResult" class="hidden fade-in" style="margin-top:16px; background:#f6f5fb; border:1px solid #e2e0f4; border-radius:14px; padding:16px;">
+              <div style="font-size:13px; color:var(--muted); margin-bottom:10px;" id="whatifSummaryLine"></div>
+              <div class="ai-stat-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+                <div>
+                  <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Current spend</div>
+                  <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700;" id="whatifCurrent">₹0</div>
+                </div>
+                <div>
+                  <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Monthly savings</div>
+                  <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:var(--success);" id="whatifMonthly">₹0</div>
+                </div>
+                <div>
+                  <div style="font-size:10px; text-transform:uppercase; color:var(--muted); font-weight:600;">Yearly savings</div>
+                  <div style="font-family:'Space Grotesk'; font-size:18px; font-weight:700; color:var(--success);" id="whatifYearly">₹0</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex; align-items:flex-end; gap:8px;">
-          <button id="applyFiltersBtn" class="btn" style="width:auto; padding:9px 16px; margin-top:0;">Filter</button>
-          <button id="clearFiltersBtn" class="btn btn-secondary" style="width:auto; padding:9px 16px; margin-top:0;">Clear</button>
+
+        <!-- ============ PAGE: SETTINGS ============ -->
+        <div class="page hidden" id="page-settings">
+          <div class="page-header">
+            <div class="page-title">Settings</div>
+            <div class="page-subtitle">Account and session.</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Account</div>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:18px;">
+              You're signed in to SpendWise AI. Signing out will end your current session.
+            </p>
+            <button class="logout-btn" id="logoutBtn">Log out</button>
+          </div>
         </div>
-      </div>
-      <div id="historyListWrap"><div class="empty-state">Loading history...</div></div>
+
+      </main>
     </div>
-  </main>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-nav">
+    <button class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+      Home
+    </button>
+    <button class="nav-item" data-page="add">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+      Add
+    </button>
+    <button class="nav-item" data-page="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+      History
+    </button>
+    <button class="nav-item" data-page="coach">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path></svg>
+      Coach
+    </button>
+    <button class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      Settings
+    </button>
+  </nav>
 </div>
 
 <script>
+  // ============================================================
+  // 0. PAGE NAVIGATION (new — pure UI, doesn't touch app logic)
+  // ============================================================
+  const pageTitles = {
+    dashboard: "Dashboard", add: "Add Expense", history: "History",
+    coach: "AI Coach", settings: "Settings"
+  };
+
+  function goToPage(pageName) {
+    document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+    const target = document.getElementById('page-' + pageName);
+    if (target) target.classList.remove('hidden');
+
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-page') === pageName);
+    });
+
+    const label = document.getElementById('mobilePageLabel');
+    if (label) label.textContent = pageTitles[pageName] || '';
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => goToPage(btn.getAttribute('data-page')));
+  });
+
   // ============================================================
   // 1. CONFIG — paste your Supabase keys here
   // Get these from: Supabase Dashboard → Settings → API
@@ -476,6 +654,7 @@
     document.getElementById('dateInput').valueAsDate = new Date();
     loadDashboard();
     loadHistory();
+    goToPage('dashboard');
   }
 
   // Check if already logged in on page load
@@ -500,7 +679,6 @@
   }
 
   if (!SpeechRecognition) {
-    // Fallback: browser doesn't support voice input — keep mic button harmless
     micBtn.disabled = true;
     micBtn.title = "Voice input isn't supported in this browser. Please type instead.";
     micBtn.style.opacity = "0.4";
@@ -520,15 +698,13 @@
       }
       try {
         recognition.start();
-      } catch (e) {
-        // start() throws if called twice quickly — safe to ignore
-      }
+      } catch (e) {}
     });
 
     recognition.onstart = () => {
       isRecording = true;
       micBtn.textContent = "⏺";
-      micBtn.style.background = "#fdecea";
+      micBtn.style.background = "#fbecea";
       showVoiceStatus("Listening... speak your expense now.", "var(--primary)");
     };
 
@@ -536,7 +712,6 @@
       const transcript = event.results[0][0].transcript;
       document.getElementById('aiTextInput').value = transcript;
       showVoiceStatus(`Heard: "${transcript}" — parsing...`, "var(--muted)");
-      // Automatically trigger the same parse flow used for typed text
       document.getElementById('aiParseBtn').click();
     };
 
@@ -603,7 +778,6 @@
         return;
       }
 
-      // Pre-fill the existing manual form fields — this becomes the confirm step
       document.getElementById('amountInput').value = data.amount;
       document.getElementById('categoryInput').value = data.category;
       document.getElementById('descriptionInput').value = data.description;
@@ -613,7 +787,6 @@
       document.getElementById('aiTextInput').value = '';
       hideVoiceStatus();
 
-      // Scroll the confirm form into view so the user notices it
       document.getElementById('amountInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     } catch (err) {
@@ -628,7 +801,7 @@
   // ============================================================
   // 4. ADD / EDIT EXPENSE
   // ============================================================
-  let editingExpenseId = null; // null = adding a new expense; set = editing existing one
+  let editingExpenseId = null;
 
   function enterEditMode(expense) {
     editingExpenseId = expense.id;
@@ -639,7 +812,8 @@
     document.getElementById('paymentInput').value = expense.payment_method || 'upi';
     document.getElementById('addExpenseBtn').textContent = "Update expense";
     document.getElementById('cancelEditBtn').classList.remove('hidden');
-    document.querySelector('.card .card-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    goToPage('add');
+    document.querySelector('#page-add .card-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function exitEditMode() {
@@ -671,14 +845,12 @@
 
     let error;
     if (editingExpenseId) {
-      // UPDATE existing expense
       ({ error } = await supabaseClient
         .from('expenses')
         .update({ amount, category, description, expense_date, payment_method })
         .eq('id', editingExpenseId)
         .eq('user_id', currentUser.id));
     } else {
-      // INSERT new expense
       ({ error } = await supabaseClient.from('expenses').insert({
         user_id: currentUser.id,
         amount, category, description, expense_date, payment_method
@@ -731,8 +903,6 @@
     renderTransactions(expenses.slice(0, 10), 'txListWrap', () => { loadDashboard(); if (typeof loadHistory === 'function') loadHistory(); });
   }
 
-  // Cache of full expense objects by id, so Edit buttons can look up full data
-  // without re-fetching or stuffing JSON into HTML attributes.
   const expenseCache = {};
 
   function renderTransactions(expenses, containerId = 'txListWrap', onChangeCallback = loadDashboard) {
@@ -750,7 +920,7 @@
           <div class="tx-meta">${e.category} · ${formatDate(e.expense_date)} · ${e.payment_method || 'n/a'}</div>
         </div>
         <div class="tx-amount">-${formatINR(e.amount)}</div>
-        <button class="tx-edit" data-id="${e.id}" style="background:none; border:none; color:var(--primary); cursor:pointer; font-size:13px; padding:4px 8px;">Edit</button>
+        <button class="tx-edit" data-id="${e.id}">Edit</button>
         <button class="tx-delete" data-id="${e.id}">Delete</button>
       </div>
     `).join('');
@@ -766,7 +936,7 @@
     wrap.querySelectorAll('.tx-delete').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-id');
-        if (editingExpenseId === id) exitEditMode(); // don't leave a stale edit form open
+        if (editingExpenseId === id) exitEditMode();
         await supabaseClient.from('expenses').delete().eq('id', id);
         onChangeCallback();
       });
@@ -942,7 +1112,6 @@
     btn.innerHTML = '<span class="btn-spinner"></span>Thinking...';
 
     try {
-      // Step 1: AI understands the question only — no math here
       const res = await fetch(WHATIF_FUNCTION_URL, {
         method: 'POST',
         headers: {
@@ -963,7 +1132,6 @@
 
       const { category, reduction_type, reduction_value } = intent;
 
-      // Step 2: Get the REAL current-month total for this category from Supabase
       const today = new Date();
       const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
 
@@ -982,16 +1150,14 @@
 
       const currentSpend = rows.reduce((sum, r) => sum + Number(r.amount), 0);
 
-      // Step 3: Plain arithmetic — no AI involved in this calculation
       let monthlySavings;
       if (reduction_type === 'percentage') {
         monthlySavings = currentSpend * (reduction_value / 100);
       } else {
-        monthlySavings = Math.min(reduction_value, currentSpend); // can't save more than you spend
+        monthlySavings = Math.min(reduction_value, currentSpend);
       }
       const yearlySavings = monthlySavings * 12;
 
-      // Step 4: Display the real numbers
       const reductionLabel = reduction_type === 'percentage'
         ? `${reduction_value}% reduction in ${category}`
         : `₹${reduction_value.toLocaleString('en-IN')} reduction in ${category}`;
